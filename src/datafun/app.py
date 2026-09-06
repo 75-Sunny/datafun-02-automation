@@ -98,9 +98,9 @@ GROUP_COLUMN: Final[str] = "species"
 # Use a raw string (r before the opening quotes) so it appears just
 # like I typed it.
 WHY_THIS_GROUP: Final[str] = r"""
-The species column has a small number of unique values.
-There are three unique species, so a for loop can
-process and log each one.
+The sex column has two unique values: Male and Female.
+Using sex allows us to compare the distribution of bill
+length between male and female penguins.
 """
 
 # CUSTOM: WHICH measurement to classify, and why this one.
@@ -110,11 +110,11 @@ MEASUREMENT_COLUMN: Final[str] = "bill_length_mm"
 # Use a triple-quoted string (three double quotes) to allow multi-line text.
 # Use a raw string (r before the opening quotes) so it appears just
 # like I typed it.
+
 WHY_THIS_MEASUREMENT: Final[str] = r"""
-Bill length varies across penguins.
-There is no fixed cutoff, so we'll calculate the average
-and assign a classification depending on a threshold
-around the average value.
+Bill length is a numerical measurement that can be used
+to compare the distribution of bill lengths between
+male and female penguins.
 """
 
 # CUSTOM: Set thresholds around the mean to
@@ -153,6 +153,7 @@ def main() -> None:
 
     df: pd.DataFrame = pd.read_csv(DATA_FILE_PATH)
 
+    LOG.info(f"Sex values found in data: {df['sex'].unique()}")
     LOG.info("Data loaded successfully.")
 
     LOG.info("-------------------------------")
@@ -309,31 +310,46 @@ def main() -> None:
         time.sleep(STREAM_WAIT_SECONDS)
 
     LOG.info("-------------------------------")
-    LOG.info("07. VISUALIZE the selected measurement.")
+    LOG.info("-------------------------------")
+    LOG.info("07. VISUALIZE bill length by sex.")
     LOG.info("-------------------------------")
 
-    LOG.info("Creating a chart to visualize the selected measurement.")
-    LOG.info("We selected one numeric column, so let's look at the distribution.")
+    LOG.info("Creating histograms for male and female penguins.")
 
-    # Define a path to save the distribution plot.
-    # REQUIRED: Use the "docs/images" folder to store generated charts.
-    CHART_PATH = Path("docs/images/measurement-distribution.png")
+    # Separate the data into male and female penguins.
+    male_penguins = df[df["sex"] == "Male"]
+    female_penguins = df[df["sex"] == "Female"]
 
-    # Call an imported function that will show a distribution plot
-    # Pass in the pandas DataFrame (df) along with the selected measurement column.
-    # It will return a matplotlib Axes object representing the distribution plot.
-    ax = show_numeric_distribution(
-        df,
-        column=MEASUREMENT_COLUMN,
-    )
+    # Create two histograms side-by-side.
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
-    # call the save_chart() function and pass in the Axes and the path
-    save_chart(ax, CHART_PATH)
+    # Male penguins
+    axes[0].hist(male_penguins[MEASUREMENT_COLUMN].dropna(), color="blue")
+    axes[0].set_title("Male Penguins")
+    axes[0].set_xlabel(MEASUREMENT_COLUMN)
+    axes[0].set_ylabel("Count")
+
+    # Female penguins
+    axes[1].hist(female_penguins[MEASUREMENT_COLUMN].dropna(), color="pink")
+    axes[1].set_title("Female Penguins")
+    axes[1].set_xlabel(MEASUREMENT_COLUMN)
+    axes[1].set_ylabel("Count")
+
+    # Add an overall title.
+    fig.suptitle("Distribution of Bill Length by Sex")
+
+    # Adjust spacing between the two histograms.
+    fig.tight_layout()
+
+    # Save the chart.
+    CHART_PATH = Path("docs/images/measurement-distribution-by-sex.png")
+    fig.savefig(CHART_PATH)
+
     LOG.info(f"Chart saved successfully at {CHART_PATH}.")
-
     LOG.info(
         "IMPORTANT: Close chart window to continue by clicking its X or close button."
     )
+
     plt.show()
 
     LOG.info("===================================")

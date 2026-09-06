@@ -137,7 +137,7 @@ change directory (cd) into the new folder,
 and run `code .` to open only this example project in VS Code:
 
 ```shell
-git clone https://github.com/denisecase/datafun-02-automation
+git clone https://github.com/75-Sunny/datafun-02-automation
 
 cd datafun-02-automation
 code .
